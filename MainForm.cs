@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Reflection;
+using System.Security.Policy;
 using System.Text.Json;
 
 namespace DNSetter
@@ -15,10 +17,12 @@ namespace DNSetter
             InitializeComponent();
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
+        private async void MainForm_Load(object sender, EventArgs e)
         {
             try
             {
+                TitleLabel.Text += "v" + Assembly.GetExecutingAssembly().GetName().Version!.ToString();
+
                 if (!File.Exists(dnsListPath))
                 {
                     // Create initial file with default entries if not exists
@@ -48,10 +52,58 @@ namespace DNSetter
                 {
                     DnsList.Items.Add(entry.Name);
                 }
+
+                await SetCurrentDnsUIAsync();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Error");
+            }
+        }
+
+        private async Task SetCurrentDnsUIAsync()
+        {
+            try
+            {
+                List<string> currentDns = new();
+
+                foreach (var nic in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    if (nic.OperationalStatus == OperationalStatus.Up &&
+                        nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                    {
+                        var ipProps = nic.GetIPProperties();
+                        var dnsAddresses = ipProps.DnsAddresses
+                                                  .Where(ip => ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                                                  .Select(ip => ip.ToString());
+
+                        currentDns.AddRange(dnsAddresses);
+                    }
+                }
+
+                // Remove duplicates, take only first 2
+                currentDns = currentDns.Distinct().Take(2).ToList();
+
+                DnsTextOne.Text = currentDns.ElementAtOrDefault(0) ?? "";
+                DnsTextTwo.Text = currentDns.ElementAtOrDefault(1) ?? "";
+
+                // Match with existing entries
+                foreach (var entry in dnsEntries)
+                {
+                    var ips = entry.IPs.Select(ip => ip.Trim()).ToList();
+                    if (ips.Count >= 2 &&
+                        currentDns.Count >= 2 &&
+                        ips[0] == currentDns[0] &&
+                        ips[1] == currentDns[1])
+                    {
+                        DnsList.SelectedItem = entry.Name;
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to detect current DNS:\n" + ex.Message, "DNS Detection Error");
             }
         }
 
@@ -184,35 +236,50 @@ namespace DNSetter
             }
         }
 
-        private void TestAllDnsListButton_Click(object sender, EventArgs e)
+        private async void TestAllDnsListButton_Click(object sender, EventArgs e)
         {
             try
             {
-                string results = "";
+                SetUIEnabled(false);
+
+                var ping = new Ping();
+                var tasks = new List<Task<string>>();
+
                 foreach (var entry in dnsEntries)
                 {
-                    results += $"{entry.Name}:\n";
-                    foreach (var ip in entry.IPs)
+                    tasks.Add(Task.Run(async () =>
                     {
-                        try
+                        string entryResult = $"{entry.Name}:\n";
+                        foreach (var ip in entry.IPs)
                         {
-                            var ping = new Ping();
-                            var reply = ping.Send(ip, 1000);
-                            results += $"  {ip}: {reply?.RoundtripTime} ms\n";
+                            try
+                            {
+                                var reply = await ping.SendPingAsync(ip, 1000);
+                                entryResult += $"  {ip}: {reply.RoundtripTime} ms\n";
+                            }
+                            catch
+                            {
+                                entryResult += $"  {ip}: Failed\n";
+                            }
                         }
-                        catch
-                        {
-                            results += $"  {ip}: Failed\n";
-                        }
-                    }
-                    results += "\n";
+                        entryResult += "\n";
+                        return entryResult;
+                    }));
                 }
 
-                MessageBox.Show(results, "All DNS Ping Test");
+                var resultsArray = await Task.WhenAll(tasks);
+                string finalResults = string.Join("", resultsArray);
+
+                var dnsListForm = new DnsList(dnsEntries);
+                dnsListForm.ShowDialog();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Error");
+            }
+            finally
+            {
+                SetUIEnabled(true);
             }
         }
 
@@ -307,6 +374,38 @@ namespace DNSetter
             {
                 MessageBox.Show($"Error: {ex.Message}", "Bypass Test");
             }
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "https://github.com/Mehrdad32/DNSetter",
+                UseShellExecute = true 
+            });
+        }
+
+        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "https://www.mehrdad32.ir/7070/dnsetter-free-application/",
+                UseShellExecute = true
+            });
+        }
+
+        private void SetUIEnabled(bool enabled)
+        {
+            DnsList.Enabled = enabled;
+            DnsTextOne.Enabled = enabled;
+            DnsTextTwo.Enabled = enabled;
+            SetButton.Enabled = enabled;
+            AddOrUpdateButton.Enabled = enabled;
+            TestSelectedDnsButton.Enabled = enabled;
+            TestAllDnsListButton.Enabled = enabled;
+            UnsetDnsButton.Enabled = enabled;
+            CheckCensorshipButton.Enabled = enabled;
+            CheckCurrentDnsButton.Enabled = enabled;
         }
     }
 
