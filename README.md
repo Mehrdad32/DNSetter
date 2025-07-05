@@ -2,7 +2,7 @@
 
 DNSetter is a simple Windows desktop application for viewing, testing, and changing DNS servers. It allows you to quickly switch between popular DNS services (like Cloudflare, Google, Shecan, 403.online, and more) and add your own custom entries.
 
-![screenshot](https://github.com/Mehrdad32/DNSetter/DNSetter_v1.0.1.2.png)
+![screenshot](https://raw.githubusercontent.com/Mehrdad32/DNSetter/refs/heads/master/DNSetter_v1.0.1.2.png)
 ---
 
 ## ✨ Features
