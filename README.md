@@ -18,9 +18,9 @@ DNSetter is a simple Windows desktop application for viewing, testing, and chang
 
 ---
 
-## 📦 Download (Comming soon...)
+## 📦 Download
 
-Go to the [Releases](https://github.com/Mehrdad32/DNSetter/releases) section and download the latest `.zip` file for:
+Go to the [Releases](https://github.com/Mehrdad32/DNSetter/releases/tag/v1.0.1.2) section and download the latest `.zip` file for:
 - ✅ Windows x64
 - ✅ Windows x86
 
@@ -78,9 +78,9 @@ MIT License
 
 ---
 
-## 📦 دانلود (به زودی...)
+## 📦 دانلود
 
-از بخش [Releases](https://github.com/Mehrdad32/DNSetter/releases) آخرین نسخه‌ی zip را دانلود کرده و فایل `DNSetter.exe` را به‌صورت **Run as Administrator** اجرا نمایید.
+از بخش [Releases](https://github.com/Mehrdad32/DNSetter/releases/tag/v1.0.1.2) آخرین نسخه‌ی zip را دانلود کرده و فایل `DNSetter.exe` را به‌صورت **Run as Administrator** اجرا نمایید.
 
 ---
 
