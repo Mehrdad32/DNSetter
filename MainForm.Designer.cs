@@ -1,287 +1,414 @@
-﻿namespace DNSetter
+#nullable enable
+namespace DNSetter
 {
     partial class MainForm
     {
-        /// <summary>
-        ///  Required designer variable.
-        /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private System.ComponentModel.IContainer? components;
 
-        /// <summary>
-        ///  Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
+            if (disposing) components?.Dispose();
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
-
-        /// <summary>
-        ///  Required method for Designer support - do not modify
-        ///  the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+            components = new System.ComponentModel.Container();
+            var resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+            var toolTip = new ToolTip(components);
+            var root = new TableLayoutPanel();
+            var header = new TableLayoutPanel();
+            var headerText = new TableLayoutPanel();
+            var body = new Panel();
+            var content = new TableLayoutPanel();
+            var adapterCard = new GroupBox();
+            var adapterLayout = new TableLayoutPanel();
+            var adapterActions = new TableLayoutPanel();
+            var stateHeading = new TableLayoutPanel();
+            var dnsCard = new GroupBox();
+            var dnsLayout = new TableLayoutPanel();
+            var addresses = new TableLayoutPanel();
+            var primaryField = new TableLayoutPanel();
+            var secondaryField = new TableLayoutPanel();
+            var dnsActions = new FlowLayoutPanel();
+            var toolsCard = new GroupBox();
+            var toolsLayout = new TableLayoutPanel();
+            var toolsActions = new FlowLayoutPanel();
+            var footer = new TableLayoutPanel();
+            TitleLabel = new Label();
+            VersionLabel = new Label();
+            AdapterList = new ComboBox();
+            RefreshAdaptersButton = new Button();
+            CurrentAdapterDnsLabel = new TextBox();
+            AdapterStateLabel = new Label();
+            DnsModeLabel = new Label();
             DnsList = new ComboBox();
             DnsTextOne = new TextBox();
             DnsTextTwo = new TextBox();
             SetButton = new Button();
+            UnsetDnsButton = new Button();
             AddOrUpdateButton = new Button();
             TestSelectedDnsButton = new Button();
             TestAllDnsListButton = new Button();
-            UnsetDnsButton = new Button();
             CheckCurrentDnsButton = new Button();
             CheckCensorshipButton = new Button();
-            pictureBox1 = new PictureBox();
-            label1 = new Label();
-            label2 = new Label();
-            label3 = new Label();
-            TitleLabel = new Label();
-            label5 = new Label();
+            OperationStatusLabel = new Label();
+            BusyProgressBar = new ProgressBar();
             linkLabel1 = new LinkLabel();
             linkLabel2 = new LinkLabel();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
-            // 
-            // DnsList
-            // 
-            DnsList.DropDownStyle = ComboBoxStyle.DropDownList;
-            DnsList.FormattingEnabled = true;
-            DnsList.Location = new Point(153, 159);
-            DnsList.Name = "DnsList";
-            DnsList.Size = new Size(241, 31);
-            DnsList.TabIndex = 0;
-            DnsList.SelectedIndexChanged += DnsList_SelectedIndexChanged;
-            // 
-            // DnsTextOne
-            // 
-            DnsTextOne.Location = new Point(153, 205);
-            DnsTextOne.Name = "DnsTextOne";
-            DnsTextOne.Size = new Size(241, 30);
-            DnsTextOne.TabIndex = 1;
-            // 
-            // DnsTextTwo
-            // 
-            DnsTextTwo.Location = new Point(153, 241);
-            DnsTextTwo.Name = "DnsTextTwo";
-            DnsTextTwo.Size = new Size(241, 30);
-            DnsTextTwo.TabIndex = 2;
-            // 
-            // SetButton
-            // 
-            SetButton.Location = new Point(19, 309);
-            SetButton.Name = "SetButton";
-            SetButton.Size = new Size(179, 37);
-            SetButton.TabIndex = 3;
-            SetButton.Text = "&Set DNS";
-            SetButton.UseVisualStyleBackColor = true;
-            SetButton.Click += SetButton_Click;
-            // 
-            // AddOrUpdateButton
-            // 
-            AddOrUpdateButton.Location = new Point(19, 352);
-            AddOrUpdateButton.Name = "AddOrUpdateButton";
-            AddOrUpdateButton.Size = new Size(179, 37);
-            AddOrUpdateButton.TabIndex = 4;
-            AddOrUpdateButton.Text = "&Add Or Update";
-            AddOrUpdateButton.UseVisualStyleBackColor = true;
-            AddOrUpdateButton.Click += AddOrUpdateButton_Click;
-            // 
-            // TestSelectedDnsButton
-            // 
-            TestSelectedDnsButton.Location = new Point(19, 395);
-            TestSelectedDnsButton.Name = "TestSelectedDnsButton";
-            TestSelectedDnsButton.Size = new Size(179, 37);
-            TestSelectedDnsButton.TabIndex = 5;
-            TestSelectedDnsButton.Text = "&Test DNS By PING";
-            TestSelectedDnsButton.UseVisualStyleBackColor = true;
-            TestSelectedDnsButton.Click += TestSelectedDnsButton_Click;
-            // 
-            // TestAllDnsListButton
-            // 
-            TestAllDnsListButton.Location = new Point(215, 309);
-            TestAllDnsListButton.Name = "TestAllDnsListButton";
-            TestAllDnsListButton.Size = new Size(179, 37);
-            TestAllDnsListButton.TabIndex = 6;
-            TestAllDnsListButton.Text = "T&est All DNS List";
-            TestAllDnsListButton.UseVisualStyleBackColor = true;
-            TestAllDnsListButton.Click += TestAllDnsListButton_Click;
-            // 
-            // UnsetDnsButton
-            // 
-            UnsetDnsButton.Location = new Point(215, 352);
-            UnsetDnsButton.Name = "UnsetDnsButton";
-            UnsetDnsButton.Size = new Size(179, 37);
-            UnsetDnsButton.TabIndex = 7;
-            UnsetDnsButton.Text = "&Unset DNS";
-            UnsetDnsButton.UseVisualStyleBackColor = true;
-            UnsetDnsButton.Click += UnsetDnsButton_Click;
-            // 
-            // CheckCurrentDnsButton
-            // 
-            CheckCurrentDnsButton.Location = new Point(215, 395);
-            CheckCurrentDnsButton.Name = "CheckCurrentDnsButton";
-            CheckCurrentDnsButton.Size = new Size(179, 37);
-            CheckCurrentDnsButton.TabIndex = 8;
-            CheckCurrentDnsButton.Text = "&Check System DNS";
-            CheckCurrentDnsButton.UseVisualStyleBackColor = true;
-            CheckCurrentDnsButton.Click += CheckCurrentDnsButton_Click;
-            // 
-            // CheckCensorshipButton
-            // 
-            CheckCensorshipButton.Location = new Point(19, 438);
-            CheckCensorshipButton.Name = "CheckCensorshipButton";
-            CheckCensorshipButton.Size = new Size(375, 37);
-            CheckCensorshipButton.TabIndex = 9;
-            CheckCensorshipButton.Text = "Chec&k Network To Bypass Sanctions";
-            CheckCensorshipButton.UseVisualStyleBackColor = true;
-            CheckCensorshipButton.Click += CheckCensorshipButton_Click;
-            // 
-            // pictureBox1
-            // 
-            pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
-            pictureBox1.Location = new Point(12, 12);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(135, 120);
-            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
-            pictureBox1.TabIndex = 10;
-            pictureBox1.TabStop = false;
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Location = new Point(24, 208);
-            label1.Name = "label1";
-            label1.Size = new Size(123, 23);
-            label1.TabIndex = 11;
-            label1.Text = "Preferred DNS:";
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Location = new Point(12, 244);
-            label2.Name = "label2";
-            label2.Size = new Size(135, 23);
-            label2.TabIndex = 12;
-            label2.Text = "Alternative DNS:";
-            // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Location = new Point(29, 162);
-            label3.Name = "label3";
-            label3.Size = new Size(118, 23);
-            label3.TabIndex = 13;
-            label3.Text = "Service Name:";
-            // 
-            // TitleLabel
-            // 
-            TitleLabel.AutoSize = true;
-            TitleLabel.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            TitleLabel.Location = new Point(159, 12);
+
+            // Docked sections and auto-sized rows keep the form usable at larger text/DPI settings.
+            root.Name = "RootLayout";
+            root.Dock = DockStyle.Fill;
+            root.ColumnCount = 1;
+            root.RowCount = 4;
+            root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            root.Margin = Padding.Empty;
+            root.BackColor = UiTheme.Background;
+
+            header.Name = "Header";
+            header.Dock = DockStyle.Fill;
+            header.AutoSize = true;
+            header.Padding = new Padding(24, 12, 24, 12);
+            header.Margin = Padding.Empty;
+            header.ColumnCount = 2;
+            header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            header.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            header.BackColor = UiTheme.Header;
+            headerText.Dock = DockStyle.Fill;
+            headerText.AutoSize = true;
+            headerText.ColumnCount = 1;
+            headerText.Margin = Padding.Empty;
             TitleLabel.Name = "TitleLabel";
-            TitleLabel.Size = new Size(102, 23);
-            TitleLabel.TabIndex = 14;
-            TitleLabel.Text = "DNSetter - ";
-            // 
-            // label5
-            // 
-            label5.AutoSize = true;
-            label5.Font = new Font("Segoe UI", 9F);
-            label5.Location = new Point(159, 52);
-            label5.Name = "label5";
-            label5.Size = new Size(208, 20);
-            label5.TabIndex = 15;
-            label5.Text = "Free DNS setter and tools app";
-            // 
-            // linkLabel1
-            // 
-            linkLabel1.ActiveLinkColor = Color.Brown;
-            linkLabel1.AutoSize = true;
-            linkLabel1.Font = new Font("Segoe UI", 9F);
-            linkLabel1.Location = new Point(159, 84);
+            TitleLabel.Text = "DNSetter";
+            TitleLabel.AutoSize = true;
+            TitleLabel.Font = new Font("Segoe UI", 22F, FontStyle.Bold);
+            TitleLabel.ForeColor = UiTheme.HeaderText;
+            TitleLabel.Margin = Padding.Empty;
+            var subtitle = new Label
+            {
+                Text = "A clearer view of your network. A simpler way to set DNS.",
+                AutoSize = true, Dock = DockStyle.Fill, ForeColor = UiTheme.HeaderMuted, Margin = new Padding(0, 4, 0, 0)
+            };
+            VersionLabel.Name = "VersionLabel";
+            VersionLabel.AutoSize = true;
+            VersionLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            VersionLabel.ForeColor = UiTheme.HeaderMuted;
+            VersionLabel.Margin = new Padding(16, 10, 0, 0);
+            headerText.Controls.Add(TitleLabel, 0, 0);
+            headerText.Controls.Add(subtitle, 0, 1);
+            header.Controls.Add(headerText, 0, 0);
+            header.Controls.Add(VersionLabel, 1, 0);
+
+            body.Name = "ScrollableContent";
+            body.Dock = DockStyle.Fill;
+            body.AutoScroll = true;
+            body.Padding = new Padding(20, 12, 20, 12);
+            body.Margin = Padding.Empty;
+            content.Name = "ContentLayout";
+            content.Dock = DockStyle.Top;
+            content.AutoSize = true;
+            content.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            content.ColumnCount = 1;
+            content.RowCount = 3;
+            content.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            content.Margin = Padding.Empty;
+            body.Controls.Add(content);
+
+            adapterCard.Name = "AdapterCard";
+            adapterCard.Text = "1   Network adapter";
+            adapterCard.Dock = DockStyle.Fill;
+            adapterCard.AutoSize = true;
+            adapterCard.Padding = new Padding(16, 8, 16, 10);
+            adapterCard.Margin = new Padding(0, 0, 0, 12);
+            adapterCard.BackColor = UiTheme.Surface;
+            adapterCard.TabIndex = 0;
+            adapterLayout.Dock = DockStyle.Fill;
+            adapterLayout.AutoSize = true;
+            adapterLayout.ColumnCount = 1;
+            adapterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            adapterLayout.Margin = Padding.Empty;
+            adapterActions.Dock = DockStyle.Fill;
+            adapterActions.AutoSize = true;
+            adapterActions.ColumnCount = 2;
+            adapterActions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            adapterActions.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            adapterActions.Margin = Padding.Empty;
+            AdapterList.Name = "AdapterList";
+            AdapterList.Dock = DockStyle.Fill;
+            AdapterList.DropDownStyle = ComboBoxStyle.DropDownList;
+            AdapterList.DropDownWidth = 650;
+            AdapterList.Margin = new Padding(0, 3, 12, 3);
+            AdapterList.TabIndex = 0;
+            AdapterList.AccessibleName = "Network adapter";
+            AdapterList.SelectedIndexChanged += AdapterList_SelectedIndexChanged;
+            RefreshAdaptersButton.Name = "RefreshAdaptersButton";
+            RefreshAdaptersButton.Text = "&Refresh";
+            RefreshAdaptersButton.TabIndex = 1;
+            RefreshAdaptersButton.Click += RefreshAdaptersButton_Click;
+            adapterActions.Controls.Add(AdapterList, 0, 0);
+            adapterActions.Controls.Add(RefreshAdaptersButton, 1, 0);
+            AdapterStateLabel.Name = "AdapterStateLabel";
+            AdapterStateLabel.AutoSize = true;
+            AdapterStateLabel.Dock = DockStyle.Fill;
+            AdapterStateLabel.ForeColor = UiTheme.Muted;
+            AdapterStateLabel.Margin = new Padding(0, 6, 0, 6);
+            AdapterStateLabel.Text = "Choose the adapter you want to configure.";
+            stateHeading.Dock = DockStyle.Fill;
+            stateHeading.AutoSize = true;
+            stateHeading.ColumnCount = 2;
+            stateHeading.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            stateHeading.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            stateHeading.Margin = Padding.Empty;
+            var currentLabel = new Label { Text = "Current IPv4 DNS", AutoSize = true, Margin = new Padding(0, 0, 0, 6) };
+            DnsModeLabel.Name = "DnsModeLabel";
+            DnsModeLabel.Text = "No adapter selected";
+            DnsModeLabel.AutoSize = true;
+            DnsModeLabel.ForeColor = UiTheme.Muted;
+            DnsModeLabel.Margin = new Padding(12, 0, 0, 6);
+            stateHeading.Controls.Add(currentLabel, 0, 0);
+            stateHeading.Controls.Add(DnsModeLabel, 1, 0);
+            CurrentAdapterDnsLabel.Name = "CurrentAdapterDnsLabel";
+            CurrentAdapterDnsLabel.Dock = DockStyle.Fill;
+            CurrentAdapterDnsLabel.Multiline = true;
+            CurrentAdapterDnsLabel.ReadOnly = true;
+            CurrentAdapterDnsLabel.ScrollBars = ScrollBars.Vertical;
+            CurrentAdapterDnsLabel.Height = 44;
+            CurrentAdapterDnsLabel.Margin = Padding.Empty;
+            CurrentAdapterDnsLabel.Font = new Font("Consolas", 10F);
+            CurrentAdapterDnsLabel.BackColor = UiTheme.ReadOnly;
+            CurrentAdapterDnsLabel.AccessibleName = "Current IPv4 DNS servers, read only";
+            CurrentAdapterDnsLabel.TabIndex = 2;
+            adapterLayout.Controls.Add(adapterActions, 0, 0);
+            adapterLayout.Controls.Add(AdapterStateLabel, 0, 1);
+            adapterLayout.Controls.Add(stateHeading, 0, 2);
+            adapterLayout.Controls.Add(CurrentAdapterDnsLabel, 0, 3);
+            adapterCard.Controls.Add(adapterLayout);
+
+            dnsCard.Name = "DnsSettingsCard";
+            dnsCard.Text = "2   DNS settings";
+            dnsCard.Dock = DockStyle.Fill;
+            dnsCard.AutoSize = true;
+            dnsCard.Padding = new Padding(16, 8, 16, 10);
+            dnsCard.Margin = new Padding(0, 0, 0, 12);
+            dnsCard.BackColor = UiTheme.Surface;
+            dnsCard.TabIndex = 1;
+            dnsLayout.Dock = DockStyle.Fill;
+            dnsLayout.AutoSize = true;
+            dnsLayout.ColumnCount = 1;
+            dnsLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            dnsLayout.Margin = Padding.Empty;
+            var providerLabel = new Label { Text = "DNS provider", AutoSize = true, Margin = new Padding(0, 0, 0, 6) };
+            DnsList.Name = "DnsList";
+            DnsList.Dock = DockStyle.Fill;
+            DnsList.DropDownStyle = ComboBoxStyle.DropDownList;
+            DnsList.Margin = new Padding(0, 0, 0, 12);
+            DnsList.TabIndex = 0;
+            DnsList.AccessibleName = "DNS provider";
+            DnsList.SelectedIndexChanged += DnsList_SelectedIndexChanged;
+            addresses.Dock = DockStyle.Fill;
+            addresses.AutoSize = true;
+            addresses.ColumnCount = 2;
+            addresses.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            addresses.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            addresses.Margin = Padding.Empty;
+            addresses.TabIndex = 1;
+            primaryField.Dock = DockStyle.Fill;
+            primaryField.AutoSize = true;
+            primaryField.ColumnCount = 1;
+            primaryField.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            primaryField.Margin = new Padding(0, 0, 8, 0);
+            secondaryField.Dock = DockStyle.Fill;
+            secondaryField.AutoSize = true;
+            secondaryField.ColumnCount = 1;
+            secondaryField.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            secondaryField.Margin = new Padding(8, 0, 0, 0);
+            secondaryField.TabIndex = 1;
+            var primaryLabel = new Label { Text = "Primary DNS", AutoSize = true, Margin = new Padding(0, 0, 0, 6) };
+            var secondaryLabel = new Label { Text = "Secondary DNS (optional)", AutoSize = true, Margin = new Padding(0, 0, 0, 6) };
+            DnsTextOne.Name = "DnsTextOne";
+            DnsTextOne.Dock = DockStyle.Fill;
+            DnsTextOne.Font = new Font("Consolas", 11F);
+            DnsTextOne.PlaceholderText = "e.g. 1.1.1.1";
+            DnsTextOne.AccessibleName = "Primary IPv4 DNS server";
+            DnsTextOne.Margin = Padding.Empty;
+            DnsTextOne.TextChanged += DnsInput_TextChanged;
+            DnsTextTwo.Name = "DnsTextTwo";
+            DnsTextTwo.Dock = DockStyle.Fill;
+            DnsTextTwo.Font = new Font("Consolas", 11F);
+            DnsTextTwo.PlaceholderText = "e.g. 1.0.0.1";
+            DnsTextTwo.AccessibleName = "Secondary IPv4 DNS server, optional";
+            DnsTextTwo.Margin = Padding.Empty;
+            DnsTextTwo.TextChanged += DnsInput_TextChanged;
+            primaryField.Controls.Add(primaryLabel, 0, 0);
+            primaryField.Controls.Add(DnsTextOne, 0, 1);
+            secondaryField.Controls.Add(secondaryLabel, 0, 0);
+            secondaryField.Controls.Add(DnsTextTwo, 0, 1);
+            addresses.Controls.Add(primaryField, 0, 0);
+            addresses.Controls.Add(secondaryField, 1, 0);
+            var scopeNote = new Label
+            {
+                Text = "Changes apply to IPv4 DNS on the selected adapter. IPv6 is unchanged.",
+                AutoSize = true, Dock = DockStyle.Fill, ForeColor = UiTheme.Muted, Margin = new Padding(0, 10, 0, 10)
+            };
+            dnsActions.Dock = DockStyle.Fill;
+            dnsActions.AutoSize = true;
+            dnsActions.WrapContents = true;
+            dnsActions.Margin = Padding.Empty;
+            dnsActions.TabIndex = 2;
+            SetButton.Name = "SetButton";
+            SetButton.Text = "&Apply DNS";
+            SetButton.TabIndex = 0;
+            SetButton.Click += SetButton_Click;
+            UnsetDnsButton.Name = "UnsetDnsButton";
+            UnsetDnsButton.Text = "Auto&matic DNS";
+            UnsetDnsButton.TabIndex = 1;
+            UnsetDnsButton.Click += UnsetDnsButton_Click;
+            AddOrUpdateButton.Name = "AddOrUpdateButton";
+            AddOrUpdateButton.Text = "Sa&ve preset";
+            AddOrUpdateButton.TabIndex = 2;
+            AddOrUpdateButton.Click += AddOrUpdateButton_Click;
+            dnsActions.Controls.AddRange([SetButton, UnsetDnsButton, AddOrUpdateButton]);
+            dnsLayout.Controls.Add(providerLabel, 0, 0);
+            dnsLayout.Controls.Add(DnsList, 0, 1);
+            dnsLayout.Controls.Add(addresses, 0, 2);
+            dnsLayout.Controls.Add(scopeNote, 0, 3);
+            dnsLayout.Controls.Add(dnsActions, 0, 4);
+            dnsCard.Controls.Add(dnsLayout);
+
+            toolsCard.Name = "ToolsCard";
+            toolsCard.Text = "Network tools";
+            toolsCard.Dock = DockStyle.Fill;
+            toolsCard.AutoSize = true;
+            toolsCard.Padding = new Padding(16, 8, 16, 10);
+            toolsCard.Margin = new Padding(0, 0, 0, 12);
+            toolsCard.BackColor = UiTheme.Surface;
+            toolsCard.TabIndex = 2;
+            toolsLayout.Dock = DockStyle.Fill;
+            toolsLayout.AutoSize = true;
+            toolsLayout.ColumnCount = 1;
+            toolsLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            toolsLayout.Margin = Padding.Empty;
+            toolsActions.Dock = DockStyle.Fill;
+            toolsActions.AutoSize = true;
+            toolsActions.WrapContents = true;
+            toolsActions.Margin = Padding.Empty;
+            TestSelectedDnsButton.Name = "TestSelectedDnsButton";
+            TestSelectedDnsButton.Text = "&Ping DNS";
+            TestSelectedDnsButton.TabIndex = 0;
+            TestSelectedDnsButton.Click += TestSelectedDnsButton_Click;
+            TestAllDnsListButton.Name = "TestAllDnsListButton";
+            TestAllDnsListButton.Text = "&Test all presets";
+            TestAllDnsListButton.TabIndex = 1;
+            TestAllDnsListButton.Click += TestAllDnsListButton_Click;
+            CheckCurrentDnsButton.Name = "CheckCurrentDnsButton";
+            CheckCurrentDnsButton.Text = "Adapter &details";
+            CheckCurrentDnsButton.TabIndex = 2;
+            CheckCurrentDnsButton.Click += CheckCurrentDnsButton_Click;
+            CheckCensorshipButton.Name = "CheckCensorshipButton";
+            CheckCensorshipButton.Text = "Site reac&hability";
+            CheckCensorshipButton.TabIndex = 3;
+            CheckCensorshipButton.Click += CheckCensorshipButton_Click;
+            toolsActions.Controls.AddRange([TestSelectedDnsButton, TestAllDnsListButton, CheckCurrentDnsButton, CheckCensorshipButton]);
+            toolsLayout.Controls.Add(toolsActions, 0, 0);
+            var pingNote = new Label
+            {
+                Text = "Ping measures ICMP latency; a timeout does not prove that a DNS server is unavailable.",
+                AutoSize = true, Dock = DockStyle.Fill, ForeColor = UiTheme.Muted, Margin = new Padding(0, 10, 0, 0)
+            };
+            toolsLayout.Controls.Add(pingNote, 0, 1);
+            toolsCard.Controls.Add(toolsLayout);
+
+            OperationStatusLabel.Name = "OperationStatusLabel";
+            OperationStatusLabel.Text = "Select an adapter to get started.";
+            OperationStatusLabel.AutoSize = true;
+            OperationStatusLabel.Dock = DockStyle.Fill;
+            OperationStatusLabel.Padding = new Padding(12, 8, 12, 8);
+            OperationStatusLabel.Margin = new Padding(20, 0, 20, 0);
+            OperationStatusLabel.BackColor = UiTheme.ReadOnly;
+            OperationStatusLabel.ForeColor = UiTheme.Text;
+            OperationStatusLabel.AccessibleName = "Operation result";
+            OperationStatusLabel.TabStop = false;
+            content.Controls.Add(adapterCard, 0, 0);
+            content.Controls.Add(dnsCard, 0, 1);
+            content.Controls.Add(toolsCard, 0, 2);
+
+            footer.Dock = DockStyle.Fill;
+            footer.AutoSize = true;
+            footer.ColumnCount = 3;
+            footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            footer.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            footer.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            footer.Margin = Padding.Empty;
+            footer.Padding = new Padding(24, 8, 24, 10);
+            BusyProgressBar.Name = "BusyProgressBar";
+            BusyProgressBar.Style = ProgressBarStyle.Marquee;
+            BusyProgressBar.MarqueeAnimationSpeed = 30;
+            BusyProgressBar.Size = new Size(120, 12);
+            BusyProgressBar.Anchor = AnchorStyles.Left;
+            BusyProgressBar.Visible = false;
             linkLabel1.Name = "linkLabel1";
-            linkLabel1.Size = new Size(89, 20);
-            linkLabel1.TabIndex = 16;
-            linkLabel1.TabStop = true;
-            linkLabel1.Text = "Github Page";
+            linkLabel1.Text = "GitHub";
+            linkLabel1.AutoSize = true;
+            linkLabel1.Margin = new Padding(12, 0, 0, 0);
             linkLabel1.LinkClicked += linkLabel1_LinkClicked;
-            // 
-            // linkLabel2
-            // 
-            linkLabel2.ActiveLinkColor = Color.Brown;
-            linkLabel2.AutoSize = true;
-            linkLabel2.Font = new Font("Segoe UI", 9F);
-            linkLabel2.Location = new Point(159, 112);
             linkLabel2.Name = "linkLabel2";
-            linkLabel2.Size = new Size(120, 20);
-            linkLabel2.TabIndex = 17;
-            linkLabel2.TabStop = true;
-            linkLabel2.Text = "Owner Webpage";
+            linkLabel2.Text = "Mehrdad32";
+            linkLabel2.AutoSize = true;
+            linkLabel2.Margin = new Padding(20, 0, 0, 0);
             linkLabel2.LinkClicked += linkLabel2_LinkClicked;
-            // 
-            // MainForm
-            // 
-            AutoScaleDimensions = new SizeF(9F, 23F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(419, 496);
-            Controls.Add(linkLabel2);
-            Controls.Add(linkLabel1);
-            Controls.Add(label5);
-            Controls.Add(TitleLabel);
-            Controls.Add(label3);
-            Controls.Add(label2);
-            Controls.Add(label1);
-            Controls.Add(pictureBox1);
-            Controls.Add(CheckCensorshipButton);
-            Controls.Add(CheckCurrentDnsButton);
-            Controls.Add(UnsetDnsButton);
-            Controls.Add(TestAllDnsListButton);
-            Controls.Add(TestSelectedDnsButton);
-            Controls.Add(AddOrUpdateButton);
-            Controls.Add(SetButton);
-            Controls.Add(DnsTextTwo);
-            Controls.Add(DnsTextOne);
-            Controls.Add(DnsList);
+            footer.Controls.Add(BusyProgressBar, 0, 0);
+            footer.Controls.Add(linkLabel1, 1, 0);
+            footer.Controls.Add(linkLabel2, 2, 0);
+            root.Controls.Add(header, 0, 0);
+            root.Controls.Add(body, 0, 1);
+            root.Controls.Add(OperationStatusLabel, 0, 2);
+            root.Controls.Add(footer, 0, 3);
+
+            toolTip.SetToolTip(UnsetDnsButton, "Use automatically assigned DNS. This does not restore a previous manual preset.");
+            toolTip.SetToolTip(AddOrUpdateButton, "Save these addresses as a preset without changing your network.");
+            toolTip.SetToolTip(RefreshAdaptersButton, "Reload adapters and the selected adapter's current DNS.");
+            toolTip.SetToolTip(CurrentAdapterDnsLabel, "Current IPv4 DNS reported by Windows. Select and copy with Ctrl+C.");
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            ClientSize = new Size(780, 760);
+            MinimumSize = new Size(680, 600);
             Font = new Font("Segoe UI", 10F);
-            FormBorderStyle = FormBorderStyle.FixedDialog;
-            Icon = (Icon)resources.GetObject("$this.Icon");
-            MaximizeBox = false;
+            BackColor = UiTheme.Background;
+            ForeColor = UiTheme.Text;
+            Controls.Add(root);
+            Icon = (Icon?)resources.GetObject("$this.Icon");
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "DNSetter";
             Load += MainForm_Load;
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
-            ResumeLayout(false);
-            PerformLayout();
+            ResumeLayout(true);
         }
 
-        #endregion
-
-        private ComboBox DnsList;
-        private TextBox DnsTextOne;
-        private TextBox DnsTextTwo;
-        private Button SetButton;
-        private Button AddOrUpdateButton;
-        private Button TestSelectedDnsButton;
-        private Button TestAllDnsListButton;
-        private Button UnsetDnsButton;
-        private Button CheckCurrentDnsButton;
-        private Button CheckCensorshipButton;
-        private PictureBox pictureBox1;
-        private Label label1;
-        private Label label2;
-        private Label label3;
-        private Label TitleLabel;
-        private Label label5;
-        private LinkLabel linkLabel1;
-        private LinkLabel linkLabel2;
+        private Label TitleLabel = null!;
+        private Label VersionLabel = null!;
+        private ComboBox AdapterList = null!;
+        private Button RefreshAdaptersButton = null!;
+        private TextBox CurrentAdapterDnsLabel = null!;
+        private Label AdapterStateLabel = null!;
+        private Label DnsModeLabel = null!;
+        private ComboBox DnsList = null!;
+        private TextBox DnsTextOne = null!;
+        private TextBox DnsTextTwo = null!;
+        private Button SetButton = null!;
+        private Button AddOrUpdateButton = null!;
+        private Button TestSelectedDnsButton = null!;
+        private Button TestAllDnsListButton = null!;
+        private Button UnsetDnsButton = null!;
+        private Button CheckCurrentDnsButton = null!;
+        private Button CheckCensorshipButton = null!;
+        private Label OperationStatusLabel = null!;
+        private ProgressBar BusyProgressBar = null!;
+        private LinkLabel linkLabel1 = null!;
+        private LinkLabel linkLabel2 = null!;
     }
 }

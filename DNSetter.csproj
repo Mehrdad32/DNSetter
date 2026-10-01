@@ -1,15 +1,30 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Gakuseisean-Ivista-2-Network-Panel-Settings.ico</ApplicationIcon>
-	<Version>1.0.1.2</Version>
+    <Version>2.0.0</Version>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <Product>DNSetter</Product>
+    <Authors>Mehrdad32</Authors>
+    <Description>View, test and configure IPv4 DNS on a selected Windows network adapter.</Description>
+    <RepositoryUrl>https://github.com/Mehrdad32/DNSetter</RepositoryUrl>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="DNSetter.Core/**/*.cs;DNSetter.Windows/**/*.cs;tests/**/*.cs" />
+    <EmbeddedResource Remove="DNSetter.Core/**/*;DNSetter.Windows/**/*;tests/**/*" />
+    <None Remove="DNSetter.Core/**/*;DNSetter.Windows/**/*;tests/**/*" />
+    <ProjectReference Include="DNSetter.Core/DNSetter.Core.csproj" />
+    <ProjectReference Include="DNSetter.Windows/DNSetter.Windows.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Gakuseisean-Ivista-2-Network-Panel-Settings.ico" />

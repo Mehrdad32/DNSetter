@@ -1,73 +1,100 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Net.NetworkInformation;
 
-namespace DNSetter
+namespace DNSetter;
+
+public partial class DnsList : Form
 {
-    public partial class DnsList : Form
+    private readonly List<DnsEntry> dnsEntries;
+    private CancellationTokenSource? cancellation;
+
+    public DnsList(List<DnsEntry> entries)
     {
-        private readonly List<DnsEntry> _dnsEntries;
+        InitializeComponent();
+        UiTheme.Apply(this);
+        dnsEntries = entries.Select(x => new DnsEntry { Name = x.Name, IPs = [.. x.IPs] }).ToList();
+    }
 
-        public DnsList(List<DnsEntry> dnsEntries)
+    protected override async void OnLoad(EventArgs e)
+    {
+        base.OnLoad(e);
+        using var source = new CancellationTokenSource();
+        cancellation = source;
+        try { await LoadPingResultsAsync(source.Token); }
+        catch (OperationCanceledException) { }
+        catch (Exception ex)
         {
-            InitializeComponent();
-            _dnsEntries = dnsEntries;
+            if (!IsDisposed) ResultsStatusLabel.Text = $"Test failed: {ex.Message}";
         }
+        finally { cancellation = null; }
+    }
 
-        protected override async void OnLoad(EventArgs e)
+    protected override void OnFormClosing(FormClosingEventArgs e)
+    {
+        base.OnFormClosing(e);
+        if (!e.Cancel) cancellation?.Cancel();
+    }
+
+    private async Task LoadPingResultsAsync(CancellationToken token)
+    {
+        DnsListGrid.Columns.Clear();
+        DnsListGrid.Columns.Add("Service", "Preset");
+        DnsListGrid.Columns.Add("IP1", "Primary DNS");
+        DnsListGrid.Columns.Add("Ping1", "Ping / status");
+        DnsListGrid.Columns.Add("IP2", "Secondary DNS");
+        DnsListGrid.Columns.Add("Ping2", "Ping / status");
+        foreach (DataGridViewColumn column in DnsListGrid.Columns)
         {
-            base.OnLoad(e);
-            await LoadPingResultsAsync();
+            column.MinimumWidth = column.Index == 0 ? 130 : 110;
+            column.FillWeight = column.Index == 0 ? 130 : 100;
+            column.SortMode = DataGridViewColumnSortMode.NotSortable;
         }
-
-        private async Task LoadPingResultsAsync()
+        DnsListGrid.Columns[1].DefaultCellStyle.Font = new Font("Consolas", 10F);
+        DnsListGrid.Columns[3].DefaultCellStyle.Font = DnsListGrid.Columns[1].DefaultCellStyle.Font;
+        foreach (var entry in dnsEntries)
+            DnsListGrid.Rows.Add(entry.Name, entry.IPs.ElementAtOrDefault(0) ?? "", "Waiting…",
+                entry.IPs.ElementAtOrDefault(1) ?? "", "Waiting…");
+        ResultsProgress.Maximum = Math.Max(1, dnsEntries.Count);
+        ResultsStatusLabel.Text = $"Testing 0 of {dnsEntries.Count} presets…";
+        using var limit = new SemaphoreSlim(4);
+        var completed = 0;
+        var tasks = dnsEntries.Select(async (entry, index) =>
         {
-            DnsListGrid.Columns.Clear();
-            DnsListGrid.Columns.Add("Service", "Service");
-            DnsListGrid.Columns.Add("IP1", "IP #1");
-            DnsListGrid.Columns.Add("Ping1", "Ping #1 (ms)");
-            DnsListGrid.Columns.Add("IP2", "IP #2");
-            DnsListGrid.Columns.Add("Ping2", "Ping #2 (ms)");
-
-            var ping = new Ping();
-
-            foreach (var entry in _dnsEntries)
-            {
-                string ip1 = entry.IPs.ElementAtOrDefault(0) ?? "";
-                string ip2 = entry.IPs.ElementAtOrDefault(1) ?? "";
-
-                string ping1 = await PingAddressAsync(ping, ip1);
-                string ping2 = await PingAddressAsync(ping, ip2);
-
-                DnsListGrid.Rows.Add(entry.Name, ip1, ping1, ip2, ping2);
-            }
-        }
-
-        private async Task<string> PingAddressAsync(Ping ping, string ip)
-        {
-            if (string.IsNullOrWhiteSpace(ip)) return "N/A";
-
+            await limit.WaitAsync(token);
             try
             {
-                var reply = await ping.SendPingAsync(ip, 1000);
-                return reply.Status == IPStatus.Success ? $"{reply.RoundtripTime}" : "Failed";
+                var values = await Task.WhenAll(entry.IPs.Take(2).Select(ip => PingAddressAsync(ip, token)));
+                token.ThrowIfCancellationRequested();
+                if (IsDisposed) return;
+                DnsListGrid.Rows[index].Cells[2].Value = values.ElementAtOrDefault(0) ?? "—";
+                DnsListGrid.Rows[index].Cells[4].Value = values.ElementAtOrDefault(1) ?? "—";
+                ResultsProgress.Value = ++completed;
+                ResultsStatusLabel.Text = $"Tested {completed} of {dnsEntries.Count} presets";
             }
-            catch
-            {
-                return "Error";
-            }
-        }
-
-        private void CloseButton_Click(object sender, EventArgs e)
+            finally { limit.Release(); }
+        });
+        await Task.WhenAll(tasks);
+        if (!IsDisposed)
         {
-            Close();
+            ResultsStatusLabel.Text = $"Finished · {completed} presets";
+            foreach (DataGridViewColumn column in DnsListGrid.Columns)
+                column.SortMode = DataGridViewColumnSortMode.Automatic;
         }
     }
+
+    private static async Task<string> PingAddressAsync(string ip, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        if (string.IsNullOrWhiteSpace(ip)) return "—";
+        try
+        {
+            using var ping = new Ping();
+            var reply = await ping.SendPingAsync(ip, 1500);
+            token.ThrowIfCancellationRequested();
+            return reply.Status == IPStatus.Success ? $"{reply.RoundtripTime} ms" : reply.Status.ToString();
+        }
+        catch (OperationCanceledException) { throw; }
+        catch (Exception) { return "No ICMP reply"; }
+    }
+
+    private void CloseButton_Click(object? sender, EventArgs e) => Close();
 }
