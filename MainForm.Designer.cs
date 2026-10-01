@@ -265,7 +265,7 @@ namespace DNSetter
             SetButton.TabIndex = 0;
             SetButton.Click += SetButton_Click;
             UnsetDnsButton.Name = "UnsetDnsButton";
-            UnsetDnsButton.Text = "&Automatic DNS";
+            UnsetDnsButton.Text = "Auto&matic DNS";
             UnsetDnsButton.TabIndex = 1;
             UnsetDnsButton.Click += UnsetDnsButton_Click;
             AddOrUpdateButton.Name = "AddOrUpdateButton";

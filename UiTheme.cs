@@ -32,6 +32,11 @@ internal static class UiTheme
                     button.BackColor = Accent;
                     button.ForeColor = Color.White;
                     button.UseVisualStyleBackColor = false;
+                    button.EnabledChanged += (_, _) =>
+                    {
+                        button.BackColor = button.Enabled ? Accent : ReadOnly;
+                        button.ForeColor = button.Enabled ? Color.White : Muted;
+                    };
                 }
             }
             if (control is LinkLabel link)
