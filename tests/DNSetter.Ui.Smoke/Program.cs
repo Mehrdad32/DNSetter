@@ -48,8 +48,12 @@ internal static class Program
                 Require(statusBounds.Bottom <= main.ClientRectangle.Bottom && statusBounds.Top >= 0,
                     "Operation result is outside the visible compact window.");
                 main.Font = new Font("Segoe UI", 15F);
-                main.ClientSize = new Size(1000, 1000);
+                // Stay inside the CI desktop height: Windows clamps an oversized native window.
+                main.ClientSize = new Size(1000, 600);
                 Capture(main, Path.Combine(output, "main-large-text.png"));
+                statusBounds = main.RectangleToClient(status.RectangleToScreen(status.ClientRectangle));
+                Require(statusBounds.Bottom <= main.ClientRectangle.Bottom && statusBounds.Top >= 0,
+                    "Operation result is outside the visible larger-text window.");
 
                 using var results = new DnsList([]);
                 results.Show(main);
