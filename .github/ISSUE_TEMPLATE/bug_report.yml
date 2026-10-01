@@ -1,0 +1,39 @@
+name: Bug report / گزارش مشکل
+description: Report unexpected behavior with steps to reproduce it.
+title: "[Bug]: "
+labels: []
+body:
+  - type: input
+    id: version
+    attributes:
+      label: DNSetter version / نسخهٔ برنامه
+      placeholder: "2.0.0"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Windows version and architecture / نسخهٔ ویندوز و معماری
+      placeholder: "Windows 11, x64"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps / مراحل بازتولید
+      description: Include the selected adapter type and whether a VPN is active if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior / رفتار مورد انتظار
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and error / نتیجه و متن خطا
+      description: Include the complete error and screenshots if helpful. Remove private data from public logs.
+    validations:
+      required: true

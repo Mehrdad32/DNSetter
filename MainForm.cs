@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using DNSetter.Core;
@@ -34,7 +34,7 @@ namespace DNSetter
                 SetUIEnabled(false);
                 VersionLabel.Text = "v" + (Assembly.GetExecutingAssembly()
                     .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0]
-                    ?? "2.0.0-alpha.2");
+                    ?? "2.0.0");
 
                 if (!File.Exists(dnsListPath))
                 {

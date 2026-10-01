@@ -365,3 +365,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Portable user settings and generated UI captures
+/list.json
+/ui-preview/

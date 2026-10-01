@@ -1,0 +1,17 @@
+name: Feature request / پیشنهاد قابلیت
+description: Suggest an improvement to DNSetter.
+title: "[Feature]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve / مسئله
+      description: Describe the task that is difficult with the current app.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior / رفتار پیشنهادی
+    validations:
+      required: true

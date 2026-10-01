@@ -1,4 +1,4 @@
-name: V2 validation
+name: DNSetter CI
 
 on:
   push:
@@ -9,9 +9,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   core-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -23,6 +28,7 @@ jobs:
   windows-build:
     needs: core-tests
     runs-on: windows-latest
+    timeout-minutes: 15
     strategy:
       matrix:
         rid: [win-x64, win-x86]
@@ -41,12 +47,12 @@ jobs:
         if: matrix.rid == 'win-x64'
         uses: actions/upload-artifact@v4
         with:
-          name: DNSetter-v2-ui-preview
+          name: DNSetter-ui-preview
           path: ui-preview/
           if-no-files-found: error
       - name: Upload test build
         uses: actions/upload-artifact@v4
         with:
-          name: DNSetter-v2-core-${{ matrix.rid }}
+          name: DNSetter-${{ matrix.rid }}
           path: publish/${{ matrix.rid }}/
           if-no-files-found: error
