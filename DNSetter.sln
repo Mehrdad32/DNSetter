@@ -5,6 +5,14 @@ VisualStudioVersion = 17.14.36221.1 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DNSetter", "DNSetter.csproj", "{5C4042EC-A58F-42EB-BEA7-CCA7DD4CD84B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DNSetter.Core", "DNSetter.Core\DNSetter.Core.csproj", "{F3301F49-C877-46F7-93A5-4E01C241C03A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DNSetter.Windows", "DNSetter.Windows\DNSetter.Windows.csproj", "{F3301F49-C877-46F7-93A5-4E01C241C03B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DNSetter.Core.Tests", "tests\DNSetter.Core.Tests\DNSetter.Core.Tests.csproj", "{F3301F49-C877-46F7-93A5-4E01C241C03C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DNSetter.Ui.Smoke", "tests\DNSetter.Ui.Smoke\DNSetter.Ui.Smoke.csproj", "{F3301F49-C877-46F7-93A5-4E01C241C03D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +23,22 @@ Global
 		{5C4042EC-A58F-42EB-BEA7-CCA7DD4CD84B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C4042EC-A58F-42EB-BEA7-CCA7DD4CD84B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C4042EC-A58F-42EB-BEA7-CCA7DD4CD84B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3301F49-C877-46F7-93A5-4E01C241C03A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3301F49-C877-46F7-93A5-4E01C241C03A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3301F49-C877-46F7-93A5-4E01C241C03A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3301F49-C877-46F7-93A5-4E01C241C03A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3301F49-C877-46F7-93A5-4E01C241C03B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3301F49-C877-46F7-93A5-4E01C241C03B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3301F49-C877-46F7-93A5-4E01C241C03B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3301F49-C877-46F7-93A5-4E01C241C03B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3301F49-C877-46F7-93A5-4E01C241C03C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3301F49-C877-46F7-93A5-4E01C241C03C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3301F49-C877-46F7-93A5-4E01C241C03C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3301F49-C877-46F7-93A5-4E01C241C03C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3301F49-C877-46F7-93A5-4E01C241C03D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3301F49-C877-46F7-93A5-4E01C241C03D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3301F49-C877-46F7-93A5-4E01C241C03D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3301F49-C877-46F7-93A5-4E01C241C03D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

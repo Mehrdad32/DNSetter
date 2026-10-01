@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
-using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
-using System.Security.Policy;
+using DNSetter.Core;
+using DNSetter.Windows;
 using System.Text.Json;
 
 namespace DNSetter
@@ -11,17 +11,30 @@ namespace DNSetter
     {
         private string dnsListPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "list.json");
         private List<DnsEntry> dnsEntries = new();
+        private readonly DnsService dnsService;
+        private bool updatingDnsInputs;
+        private bool isBusy;
+        private bool updatingAdapters;
+        private AdapterDnsState? currentAdapterState;
 
-        public MainForm()
+        public MainForm() : this(new DnsService(new WindowsNetworkDnsPlatform())) { }
+
+        public MainForm(DnsService service)
         {
+            dnsService = service;
             InitializeComponent();
+            UiTheme.Apply(this, SetButton);
+            SetUIEnabled(false);
         }
 
-        private async void MainForm_Load(object sender, EventArgs e)
+        private async void MainForm_Load(object? sender, EventArgs e)
         {
             try
             {
-                TitleLabel.Text += "v" + Assembly.GetExecutingAssembly().GetName().Version!.ToString();
+                SetUIEnabled(false);
+                VersionLabel.Text = "v" + (Assembly.GetExecutingAssembly()
+                    .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0]
+                    ?? "2.0.0-alpha.2");
 
                 if (!File.Exists(dnsListPath))
                 {
@@ -39,13 +52,22 @@ namespace DNSetter
                 new DnsEntry { Name = "Shatel", IPs = ["85.15.1.14", "85.15.1.15"] },
                 new DnsEntry { Name = "Level3", IPs = ["209.244.0.3", "209.244.0.4"] },
                 new DnsEntry { Name = "Cloudflare", IPs = ["1.1.1.1", "1.0.0.1"] },
-                new DnsEntry { Name = "Google", IPs = ["8.8.8.8", "4.2.2.4"] },
+                new DnsEntry { Name = "Google", IPs = ["8.8.8.8", "8.8.4.4"] },
             };
                     File.WriteAllText(dnsListPath, JsonSerializer.Serialize(defaultEntries, new JsonSerializerOptions { WriteIndented = true }));
                 }
 
                 string json = File.ReadAllText(dnsListPath);
                 dnsEntries = JsonSerializer.Deserialize<List<DnsEntry>>(json) ?? new();
+                // Migrate only the exact incorrect built-in pair; preserve custom entries.
+                var legacyGoogle = dnsEntries.FirstOrDefault(x => x.Name == "Google" &&
+                    x.IPs.SequenceEqual(new[] { "8.8.8.8", "4.2.2.4" }));
+                if (legacyGoogle != null)
+                {
+                    legacyGoogle.IPs = ["8.8.8.8", "8.8.4.4"];
+                    File.WriteAllText(dnsListPath, JsonSerializer.Serialize(dnsEntries,
+                        new JsonSerializerOptions { WriteIndented = true }));
+                }
 
                 DnsList.Items.Clear();
                 foreach (var entry in dnsEntries)
@@ -53,330 +75,300 @@ namespace DNSetter
                     DnsList.Items.Add(entry.Name);
                 }
 
-                await SetCurrentDnsUIAsync();
+                // Keep the initial window inside the current screen's working area.
+                var area = Screen.FromControl(this).WorkingArea;
+                Size = new Size(Math.Min(Width, area.Width), Math.Min(Height, area.Height));
+                await RefreshAdaptersAsync();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "Error");
+                ShowOperationError(ex);
             }
+            finally { SetUIEnabled(true); }
         }
 
-        private async Task SetCurrentDnsUIAsync()
+        private NetworkAdapter SelectedAdapter => AdapterList.SelectedItem as NetworkAdapter
+            ?? throw new InvalidOperationException("Select a network adapter first.");
+
+        private async Task RefreshAdaptersAsync()
         {
+            var previousId = (AdapterList.SelectedItem as NetworkAdapter)?.Id;
+            currentAdapterState = null;
+            DnsModeLabel.Text = "No adapter selected";
+            AdapterStateLabel.Text = "Choose the adapter you want to configure.";
+            CurrentAdapterDnsLabel.Clear();
+            SetStatus("Reading network adapters…");
+            var adapters = await dnsService.GetAdaptersAsync();
+            updatingAdapters = true;
             try
             {
-                List<string> currentDns = new();
-
-                foreach (var nic in NetworkInterface.GetAllNetworkInterfaces())
+                AdapterList.Items.Clear();
+                AdapterList.DisplayMember = nameof(NetworkAdapter.DisplayName);
+                foreach (var adapter in adapters) AdapterList.Items.Add(adapter);
+                var selected = previousId.HasValue ? adapters.FirstOrDefault(x => x.Id == previousId) : null;
+                // Gateway presence does not prove which adapter carries the default route.
+                // With multiple connected adapters (including VPNs), require an explicit choice.
+                if (!previousId.HasValue)
                 {
-                    if (nic.OperationalStatus == OperationalStatus.Up &&
-                        nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                    {
-                        var ipProps = nic.GetIPProperties();
-                        var dnsAddresses = ipProps.DnsAddresses
-                                                  .Where(ip => ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                                                  .Select(ip => ip.ToString());
-
-                        currentDns.AddRange(dnsAddresses);
-                    }
+                    var connected = adapters.Where(x => x.IsUp).ToArray();
+                    if (connected.Length == 1) selected = connected[0];
                 }
-
-                // Remove duplicates, take only first 2
-                currentDns = currentDns.Distinct().Take(2).ToList();
-
-                DnsTextOne.Text = currentDns.ElementAtOrDefault(0) ?? "";
-                DnsTextTwo.Text = currentDns.ElementAtOrDefault(1) ?? "";
-
-                // Match with existing entries
-                foreach (var entry in dnsEntries)
-                {
-                    var ips = entry.IPs.Select(ip => ip.Trim()).ToList();
-                    if (ips.Count >= 2 &&
-                        currentDns.Count >= 2 &&
-                        ips[0] == currentDns[0] &&
-                        ips[1] == currentDns[1])
-                    {
-                        DnsList.SelectedItem = entry.Name;
-                        break;
-                    }
-                }
+                if (selected != null) AdapterList.SelectedItem = selected;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Failed to detect current DNS:\n" + ex.Message, "DNS Detection Error");
-            }
+            finally { updatingAdapters = false; }
+            DnsList.SelectedIndex = -1;
+            DnsTextOne.Clear();
+            DnsTextTwo.Clear();
+            if (AdapterList.SelectedItem is NetworkAdapter)
+                ShowAdapterState(await dnsService.ReadAsync(SelectedAdapter.Id));
+            else
+                SetStatus(adapters.Count == 0 ? "No IPv4 network adapters found."
+                    : previousId.HasValue ? "The previous adapter disappeared. Select an adapter."
+                    : "Select the adapter whose IPv4 DNS you want to change.");
         }
 
-        private void DnsList_SelectedIndexChanged(object sender, EventArgs e)
+        private void ShowAdapterState(AdapterDnsState state)
         {
+            currentAdapterState = state;
+            var current = state.EffectiveIpv4Servers;
+            DnsModeLabel.Text = state.Configuration.Mode == DnsMode.Automatic ? "Automatic (DHCP)" : "Manual";
+            AdapterStateLabel.Text = $"{(state.Adapter.IsUp ? "Connected" : "Disconnected")} · {state.Adapter.Description}";
+            CurrentAdapterDnsLabel.Text = current.Count == 0 ? "No IPv4 DNS servers reported." : string.Join(Environment.NewLine, current);
+            updatingDnsInputs = true;
             try
             {
-                var selected = dnsEntries.FirstOrDefault(x => x.Name == DnsList.SelectedItem?.ToString());
-                if (selected != null)
-                {
-                    DnsTextOne.Text = selected.IPs.ElementAtOrDefault(0) ?? "";
-                    DnsTextTwo.Text = selected.IPs.ElementAtOrDefault(1) ?? "";
-                }
+                DnsList.SelectedIndex = -1;
+                var matched = dnsEntries.FirstOrDefault(x => x.IPs.SequenceEqual(current));
+                if (matched != null) DnsList.SelectedItem = matched.Name;
+                DnsTextOne.Text = current.ElementAtOrDefault(0) ?? "";
+                DnsTextTwo.Text = current.ElementAtOrDefault(1) ?? "";
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString(), "Error");
-            }
+            finally { updatingDnsInputs = false; }
+            SetStatus(state.Adapter.IsUp ? $"Ready · {state.Adapter.Name}" : $"{state.Adapter.Name} is disconnected.");
         }
 
-        private void SetButton_Click(object sender, EventArgs e)
+        private void SetStatus(string text, bool error = false)
+        {
+            OperationStatusLabel.Text = text;
+            OperationStatusLabel.ForeColor = error && !SystemInformation.HighContrast
+                ? Color.FromArgb(153, 35, 43) : UiTheme.Text;
+        }
+
+        private void ShowOperationError(Exception exception)
+        {
+            SetStatus(exception.Message, error: true);
+            MessageBox.Show(this, exception.Message, "DNSetter", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private bool HasValidDnsInput()
+        {
+            if (string.IsNullOrWhiteSpace(DnsTextOne.Text)) return false;
+            try { DnsConfiguration.Manual([DnsTextOne.Text, DnsTextTwo.Text]); return true; }
+            catch (ArgumentException) { return false; }
+        }
+
+        private void DnsInput_TextChanged(object? sender, EventArgs e)
+        {
+            if (updatingDnsInputs) return;
+            DnsList.SelectedIndex = -1;
+            UpdateActionAvailability();
+            if (!isBusy)
+                SetStatus(HasValidDnsInput() ? "DNS changes are ready to apply to the selected adapter."
+                    : "Enter a valid primary IPv4 DNS. The secondary address is optional.");
+        }
+
+        private void UpdateActionAvailability()
+        {
+            var validInput = HasValidDnsInput();
+            SetButton.Enabled = !isBusy && validInput && currentAdapterState?.Adapter.IsUp == true;
+            AddOrUpdateButton.Enabled = !isBusy && validInput;
+            TestSelectedDnsButton.Enabled = !isBusy && validInput;
+            UnsetDnsButton.Enabled = !isBusy && currentAdapterState?.Adapter.IsUp == true;
+            CheckCurrentDnsButton.Enabled = !isBusy && AdapterList.SelectedItem is NetworkAdapter;
+        }
+
+        private async Task RunUiOperationAsync(Func<Task> operation)
+        {
+            if (isBusy) return;
+            SetUIEnabled(false);
+            SetStatus("Working…");
+            try { await operation(); }
+            catch (Exception ex) { ShowOperationError(ex); }
+            finally { SetUIEnabled(true); }
+        }
+
+        private async void AdapterList_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (updatingAdapters || isBusy) return;
+            await RunUiOperationAsync(async () =>
+            {
+                currentAdapterState = null;
+                DnsModeLabel.Text = "Reading…";
+                AdapterStateLabel.Text = "Reading the selected adapter.";
+                CurrentAdapterDnsLabel.Clear();
+                SetStatus("Reading selected adapter…");
+                DnsList.SelectedIndex = -1;
+                DnsTextOne.Clear();
+                DnsTextTwo.Clear();
+                ShowAdapterState(await dnsService.ReadAsync(SelectedAdapter.Id));
+            });
+        }
+
+        private async void RefreshAdaptersButton_Click(object? sender, EventArgs e) =>
+            await RunUiOperationAsync(RefreshAdaptersAsync);
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            if (isBusy && e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;
+                return;
+            }
+            base.OnFormClosing(e);
+        }
+
+        private void DnsList_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            var selected = dnsEntries.FirstOrDefault(x => x.Name == DnsList.SelectedItem?.ToString());
+            if (selected == null) return;
+            updatingDnsInputs = true;
+            try
+            {
+                DnsTextOne.Text = selected.IPs.ElementAtOrDefault(0) ?? "";
+                DnsTextTwo.Text = selected.IPs.ElementAtOrDefault(1) ?? "";
+            }
+            finally { updatingDnsInputs = false; }
+            UpdateActionAvailability();
+            if (!isBusy) SetStatus($"{selected.Name} selected. Click Apply DNS to use it on the selected adapter.");
+        }
+
+        private async void SetButton_Click(object? sender, EventArgs e)
+        {
+            await ChangeDnsAsync(reset: false);
+        }
+
+        private async Task ChangeDnsAsync(bool reset)
+        {
+            await RunUiOperationAsync(async () =>
+            {
+                var adapter = SelectedAdapter;
+                DnsChangeResult result;
+                try
+                {
+                    result = reset ? await dnsService.ResetAsync(adapter.Id)
+                        : await dnsService.SetAsync(adapter.Id, [DnsTextOne.Text, DnsTextTwo.Text]);
+                }
+                catch
+                {
+                    // Re-read after a rollback so the form does not display the attempted values as current.
+                    try { ShowAdapterState(await dnsService.ReadAsync(adapter.Id)); }
+                    catch { currentAdapterState = null; CurrentAdapterDnsLabel.Text = "Unable to read this adapter. Refresh before changing DNS."; }
+                    throw;
+                }
+                ShowAdapterState(result.State);
+                var message = reset ? $"IPv4 DNS on '{adapter.Name}' is now Automatic (DHCP)."
+                    : $"IPv4 DNS on '{adapter.Name}' was changed and verified.";
+                if (result.Warning != null) message += "\n\n" + result.Warning;
+                SetStatus(message);
+            });
+        }
+
+        private void AddOrUpdateButton_Click(object? sender, EventArgs e)
         {
             try
             {
                 string ip1 = DnsTextOne.Text.Trim();
                 string ip2 = DnsTextTwo.Text.Trim();
-
-                if (!IPAddress.TryParse(ip1, out _) || !IPAddress.TryParse(ip2, out _))
-                {
-                    MessageBox.Show("Invalid IP format.");
-                    return;
-                }
-
-                foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
-                {
-                    if (nic.OperationalStatus == OperationalStatus.Up &&
-                        nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                    {
-                        string name = nic.Name;
-
-                        Process.Start(new ProcessStartInfo("netsh", $"interface ip set dns name=\"{name}\" static {ip1}")
-                        {
-                            Verb = "runas",
-                            UseShellExecute = true
-                        })?.WaitForExit();
-
-                        Process.Start(new ProcessStartInfo("netsh", $"interface ip add dns name=\"{name}\" {ip2} index=2")
-                        {
-                            Verb = "runas",
-                            UseShellExecute = true
-                        })?.WaitForExit();
-                    }
-                }
-
-                // Flush DNS
-                Process.Start(new ProcessStartInfo("ipconfig", "/flushdns")
-                {
-                    Verb = "runas",
-                    UseShellExecute = true
-                });
-
-                MessageBox.Show("DNS changed successfully.");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString(), "Error");
-            }
-        }
-
-        private void AddOrUpdateButton_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                string ip1 = DnsTextOne.Text.Trim();
-                string ip2 = DnsTextTwo.Text.Trim();
-                if (!IPAddress.TryParse(ip1, out _) || !IPAddress.TryParse(ip2, out _))
-                {
-                    MessageBox.Show("Invalid IP address format.");
-                    return;
-                }
+                var servers = DnsConfiguration.Manual([ip1, ip2]).Servers.ToList();
 
                 string name = $"Custom DNS ({ip1})";
                 var existing = dnsEntries.FirstOrDefault(x => x.Name == name);
                 if (existing != null)
                 {
-                    existing.IPs = new List<string> { ip1, ip2 };
+                    existing.IPs = servers;
                 }
                 else
                 {
-                    dnsEntries.Add(new DnsEntry { Name = name, IPs = new List<string> { ip1, ip2 } });
+                    dnsEntries.Add(new DnsEntry { Name = name, IPs = servers });
                     DnsList.Items.Add(name);
                 }
 
                 File.WriteAllText(dnsListPath, JsonSerializer.Serialize(dnsEntries, new JsonSerializerOptions { WriteIndented = true }));
-                MessageBox.Show("DNS entry saved.");
+                DnsList.SelectedItem = name;
+                SetStatus($"Preset saved: {name}");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "Error");
+                ShowOperationError(ex);
             }
         }
 
-        private void TestSelectedDnsButton_Click(object sender, EventArgs e)
+        private async void TestSelectedDnsButton_Click(object? sender, EventArgs e)
         {
-            try
+            await RunUiOperationAsync(async () =>
             {
-                var selected = dnsEntries.FirstOrDefault(x => x.Name == DnsList.SelectedItem?.ToString());
-                if (selected == null) return;
-
-                string results = "";
-                foreach (var ip in selected.IPs)
+                var servers = DnsConfiguration.Manual([DnsTextOne.Text, DnsTextTwo.Text]).Servers;
+                var results = await Task.WhenAll(servers.Select(async ip =>
                 {
                     try
                     {
-                        var ping = new Ping();
-                        var reply = ping.Send(ip, 1000);
-                        results += $"{ip}: {reply?.RoundtripTime} ms\n";
+                        using var ping = new Ping();
+                        var reply = await ping.SendPingAsync(ip, 1500);
+                        return reply.Status == IPStatus.Success ? $"{ip}: {reply.RoundtripTime} ms"
+                            : $"{ip}: {reply.Status}";
                     }
-                    catch
-                    {
-                        results += $"{ip}: Failed\n";
-                    }
-                }
-
-                MessageBox.Show(results, "Ping Result");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString(), "Error");
-            }
+                    catch (PingException ex) { return $"{ip}: {ex.InnerException?.Message ?? ex.Message}"; }
+                }));
+                SetStatus("ICMP ping results" + Environment.NewLine + string.Join(Environment.NewLine, results));
+            });
         }
 
-        private async void TestAllDnsListButton_Click(object sender, EventArgs e)
+        private async void TestAllDnsListButton_Click(object? sender, EventArgs e)
         {
-            try
+            await RunUiOperationAsync(() =>
             {
-                SetUIEnabled(false);
-
-                var ping = new Ping();
-                var tasks = new List<Task<string>>();
-
-                foreach (var entry in dnsEntries)
-                {
-                    tasks.Add(Task.Run(async () =>
-                    {
-                        string entryResult = $"{entry.Name}:\n";
-                        foreach (var ip in entry.IPs)
-                        {
-                            try
-                            {
-                                var reply = await ping.SendPingAsync(ip, 1000);
-                                entryResult += $"  {ip}: {reply.RoundtripTime} ms\n";
-                            }
-                            catch
-                            {
-                                entryResult += $"  {ip}: Failed\n";
-                            }
-                        }
-                        entryResult += "\n";
-                        return entryResult;
-                    }));
-                }
-
-                var resultsArray = await Task.WhenAll(tasks);
-                string finalResults = string.Join("", resultsArray);
-
-                var dnsListForm = new DnsList(dnsEntries);
-                dnsListForm.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString(), "Error");
-            }
-            finally
-            {
-                SetUIEnabled(true);
-            }
+                using var resultsForm = new DnsList(dnsEntries);
+                resultsForm.ShowDialog(this);
+                SetStatus("Preset ping test finished. ICMP results do not verify DNS resolution.");
+                return Task.CompletedTask;
+            });
         }
 
-        private void UnsetDnsButton_Click(object sender, EventArgs e)
+        private async void UnsetDnsButton_Click(object? sender, EventArgs e)
         {
-            try
-            {
-                foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
-                {
-                    if (nic.OperationalStatus == OperationalStatus.Up && nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                    {
-                        string name = nic.Name;
-                        Process.Start(new ProcessStartInfo("netsh", $"interface ip set dns name=\"{name}\" dhcp")
-                        {
-                            Verb = "runas",
-                            UseShellExecute = true
-                        })?.WaitForExit();
-                    }
-                }
-
-                MessageBox.Show("DNS unset (back to DHCP).");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString(), "Error");
-            }
+            await ChangeDnsAsync(reset: true);
         }
 
-        private void CheckCurrentDnsButton_Click(object sender, EventArgs e)
+        private async void CheckCurrentDnsButton_Click(object? sender, EventArgs e)
         {
-            try
+            await RunUiOperationAsync(async () =>
             {
-                string result = "";
-                foreach (var nic in NetworkInterface.GetAllNetworkInterfaces())
-                {
-                    if (nic.OperationalStatus == OperationalStatus.Up &&
-                        nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                    {
-                        var ipProps = nic.GetIPProperties();
-                        var dnsAddresses = ipProps.DnsAddresses;
-
-                        result += $"Adapter: {nic.Name}\n";
-                        if (dnsAddresses.Count == 0)
-                        {
-                            result += "  DNS: (none or DHCP)\n";
-                        }
-                        else
-                        {
-                            foreach (var dns in dnsAddresses)
-                                result += $"  DNS: {dns}\n";
-                        }
-                        result += "\n";
-                    }
-                }
-
-                MessageBox.Show(result, "Current DNS Settings");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString(), "Error");
-            }
+                var state = await dnsService.ReadAsync(SelectedAdapter.Id);
+                ShowAdapterState(state);
+                var configured = state.Configuration.Mode == DnsMode.Automatic
+                    ? "Automatic (DHCP)" : "Manual: " + string.Join(", ", state.Configuration.Servers);
+                MessageBox.Show(this,
+                    $"Adapter: {state.Adapter.Name}\n{state.Adapter.Description}\n" +
+                    $"ID: {state.Adapter.Id}\nInterface index: {state.Adapter.InterfaceIndex}\n" +
+                    $"IPv4 configuration: {configured}\n" +
+                    $"Effective IPv4 DNS: {string.Join(", ", state.EffectiveIpv4Servers)}\n" +
+                    $"Effective IPv6 DNS (read only): {string.Join(", ", state.EffectiveIpv6Servers)}",
+                    "Selected adapter DNS");
+            });
         }
 
-        private async void CheckCensorshipButton_Click(object sender, EventArgs e)
+        private async void CheckCensorshipButton_Click(object? sender, EventArgs e)
         {
-            try
+            await RunUiOperationAsync(async () =>
             {
-                using var httpClient = new HttpClient();
-                httpClient.Timeout = TimeSpan.FromSeconds(5);
-
-                var response = await httpClient.GetAsync("https://gemini.google.com/");
-                string html = await response.Content.ReadAsStringAsync();
-
-                if (html.Contains("Error 403 (Forbidden)!!1"))
-                {
-                    MessageBox.Show("❌ This DNS does NOT bypass filtering (Gemini returns 403).", "Bypass Test");
-                }
-                else if (response.IsSuccessStatusCode)
-                {
-                    MessageBox.Show("✅ This DNS bypasses filtering (Gemini is reachable).", "Bypass Test");
-                }
-                else
-                {
-                    MessageBox.Show($"⚠ Unexpected status code: {response.StatusCode}", "Bypass Test");
-                }
-            }
-            catch (HttpRequestException ex)
-            {
-                MessageBox.Show($"❓ Could not reach site.\n{ex.Message}", "Bypass Test");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error: {ex.Message}", "Bypass Test");
-            }
+                using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(8) };
+                using var response = await httpClient.GetAsync("https://gemini.google.com/", HttpCompletionOption.ResponseHeadersRead);
+                SetStatus($"gemini.google.com returned HTTP {(int)response.StatusCode} ({response.StatusCode}).\n" +
+                    "This checks site reachability through Windows/proxy settings; it does not prove that a DNS preset bypasses restrictions.");
+            });
         }
 
-        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void linkLabel1_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
         {
             Process.Start(new ProcessStartInfo
             {
@@ -385,7 +377,7 @@ namespace DNSetter
             });
         }
 
-        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void linkLabel2_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
         {
             Process.Start(new ProcessStartInfo
             {
@@ -396,16 +388,22 @@ namespace DNSetter
 
         private void SetUIEnabled(bool enabled)
         {
+            isBusy = !enabled;
+            BusyProgressBar.Visible = !enabled;
+            UseWaitCursor = !enabled;
+            AdapterList.Enabled = enabled;
+            RefreshAdaptersButton.Enabled = enabled;
             DnsList.Enabled = enabled;
             DnsTextOne.Enabled = enabled;
             DnsTextTwo.Enabled = enabled;
-            SetButton.Enabled = enabled;
+            SetButton.Enabled = enabled && currentAdapterState?.Adapter.IsUp == true;
             AddOrUpdateButton.Enabled = enabled;
             TestSelectedDnsButton.Enabled = enabled;
             TestAllDnsListButton.Enabled = enabled;
-            UnsetDnsButton.Enabled = enabled;
+            UnsetDnsButton.Enabled = enabled && currentAdapterState?.Adapter.IsUp == true;
             CheckCensorshipButton.Enabled = enabled;
-            CheckCurrentDnsButton.Enabled = enabled;
+            CheckCurrentDnsButton.Enabled = enabled && AdapterList.SelectedItem is NetworkAdapter;
+            UpdateActionAvailability();
         }
     }
 

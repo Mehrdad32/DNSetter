@@ -1,3 +1,5 @@
+﻿> این شاخه نسخهٔ آزمایشی **2.0.0-alpha.2** است. برای تغییرات Core و اجرای تست، [راهنمای قدم اول نسخهٔ ۲](docs/v2-core-step1-fa.md) را بخوانید. معرفی و دانلود زیر مربوط به نسخهٔ پایدار قبلی است.
+
 # DNSetter
 
 DNSetter is a simple Windows desktop application for viewing, testing, and changing DNS servers. It allows you to quickly switch between popular DNS services (like Cloudflare, Google, Shecan, 403.online, and more) and add your own custom entries.
