@@ -43,19 +43,24 @@ internal static class Program
                 provider.SelectedItem = "Cloudflare";
                 main.ClientSize = new Size(680, 600);
                 Capture(main, Path.Combine(output, "main-compact.png"));
+                var status = Find<Label>(main, "OperationStatusLabel");
+                var statusBounds = main.RectangleToClient(status.RectangleToScreen(status.ClientRectangle));
+                Require(statusBounds.Bottom <= main.ClientRectangle.Bottom && statusBounds.Top >= 0,
+                    "Operation result is outside the visible compact window.");
                 main.Font = new Font("Segoe UI", 15F);
                 main.ClientSize = new Size(1000, 1000);
                 Capture(main, Path.Combine(output, "main-large-text.png"));
 
                 using var results = new DnsList([]);
-                results.CreateControl();
+                results.Show(main);
+                await Task.Yield();
                 var grid = Find<DataGridView>(results, "DnsListGrid");
-                foreach (var title in new[] { "Preset", "Primary DNS", "Ping / status", "Secondary DNS", "Ping / status" })
-                    grid.Columns.Add(Guid.NewGuid().ToString(), title);
                 grid.Rows.Add("Cloudflare", "1.1.1.1", "12 ms", "1.0.0.1", "14 ms");
                 grid.Rows.Add("Google", "8.8.8.8", "21 ms", "8.8.4.4", "22 ms");
                 grid.Rows.Add("Local preset", "192.0.2.53", "TimedOut", "", "—");
+                Find<Label>(results, "ResultsStatusLabel").Text = "Finished · 3 presets (preview data)";
                 Capture(results, Path.Combine(output, "results.png"));
+                results.Close();
                 Console.WriteLine("PASS UI smoke: preset/input separation, validation, Apply, Automatic and IPv6 preservation.");
                 Console.WriteLine("Captured native WinForms previews at normal, compact and larger text sizes.");
             }

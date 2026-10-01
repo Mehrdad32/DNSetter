@@ -77,6 +77,7 @@ namespace DNSetter
             footer.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
             footer.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
             footer.Margin = new Padding(0, 12, 0, 0);
+            ResultsStatusLabel.Name = "ResultsStatusLabel";
             ResultsStatusLabel.Text = "Preparing tests…";
             ResultsStatusLabel.AutoSize = true;
             ResultsStatusLabel.Anchor = AnchorStyles.Left;

@@ -396,13 +396,8 @@ namespace DNSetter
             DnsList.Enabled = enabled;
             DnsTextOne.Enabled = enabled;
             DnsTextTwo.Enabled = enabled;
-            SetButton.Enabled = enabled && currentAdapterState?.Adapter.IsUp == true;
-            AddOrUpdateButton.Enabled = enabled;
-            TestSelectedDnsButton.Enabled = enabled;
             TestAllDnsListButton.Enabled = enabled;
-            UnsetDnsButton.Enabled = enabled && currentAdapterState?.Adapter.IsUp == true;
             CheckCensorshipButton.Enabled = enabled;
-            CheckCurrentDnsButton.Enabled = enabled && AdapterList.SelectedItem is NetworkAdapter;
             UpdateActionAvailability();
         }
     }

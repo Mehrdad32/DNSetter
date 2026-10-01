@@ -62,9 +62,10 @@ namespace DNSetter
             root.Name = "RootLayout";
             root.Dock = DockStyle.Fill;
             root.ColumnCount = 1;
-            root.RowCount = 3;
+            root.RowCount = 4;
             root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             root.Margin = Padding.Empty;
             root.BackColor = UiTheme.Background;
@@ -72,7 +73,7 @@ namespace DNSetter
             header.Name = "Header";
             header.Dock = DockStyle.Fill;
             header.AutoSize = true;
-            header.Padding = new Padding(24, 18, 24, 18);
+            header.Padding = new Padding(24, 12, 24, 12);
             header.Margin = Padding.Empty;
             header.ColumnCount = 2;
             header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
@@ -113,7 +114,7 @@ namespace DNSetter
             content.AutoSize = true;
             content.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             content.ColumnCount = 1;
-            content.RowCount = 4;
+            content.RowCount = 3;
             content.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             content.Margin = Padding.Empty;
             body.Controls.Add(content);
@@ -122,7 +123,7 @@ namespace DNSetter
             adapterCard.Text = "1   Network adapter";
             adapterCard.Dock = DockStyle.Fill;
             adapterCard.AutoSize = true;
-            adapterCard.Padding = new Padding(16, 12, 16, 16);
+            adapterCard.Padding = new Padding(16, 8, 16, 10);
             adapterCard.Margin = new Padding(0, 0, 0, 12);
             adapterCard.BackColor = UiTheme.Surface;
             adapterCard.TabIndex = 0;
@@ -155,7 +156,7 @@ namespace DNSetter
             AdapterStateLabel.AutoSize = true;
             AdapterStateLabel.Dock = DockStyle.Fill;
             AdapterStateLabel.ForeColor = UiTheme.Muted;
-            AdapterStateLabel.Margin = new Padding(0, 6, 0, 10);
+            AdapterStateLabel.Margin = new Padding(0, 6, 0, 6);
             AdapterStateLabel.Text = "Choose the adapter you want to configure.";
             stateHeading.Dock = DockStyle.Fill;
             stateHeading.AutoSize = true;
@@ -176,7 +177,7 @@ namespace DNSetter
             CurrentAdapterDnsLabel.Multiline = true;
             CurrentAdapterDnsLabel.ReadOnly = true;
             CurrentAdapterDnsLabel.ScrollBars = ScrollBars.Vertical;
-            CurrentAdapterDnsLabel.Height = 54;
+            CurrentAdapterDnsLabel.Height = 44;
             CurrentAdapterDnsLabel.Margin = Padding.Empty;
             CurrentAdapterDnsLabel.Font = new Font("Consolas", 10F);
             CurrentAdapterDnsLabel.BackColor = UiTheme.ReadOnly;
@@ -192,7 +193,7 @@ namespace DNSetter
             dnsCard.Text = "2   DNS settings";
             dnsCard.Dock = DockStyle.Fill;
             dnsCard.AutoSize = true;
-            dnsCard.Padding = new Padding(16, 12, 16, 16);
+            dnsCard.Padding = new Padding(16, 8, 16, 10);
             dnsCard.Margin = new Padding(0, 0, 0, 12);
             dnsCard.BackColor = UiTheme.Surface;
             dnsCard.TabIndex = 1;
@@ -283,7 +284,7 @@ namespace DNSetter
             toolsCard.Text = "Network tools";
             toolsCard.Dock = DockStyle.Fill;
             toolsCard.AutoSize = true;
-            toolsCard.Padding = new Padding(16, 12, 16, 16);
+            toolsCard.Padding = new Padding(16, 8, 16, 10);
             toolsCard.Margin = new Padding(0, 0, 0, 12);
             toolsCard.BackColor = UiTheme.Surface;
             toolsCard.TabIndex = 2;
@@ -326,8 +327,8 @@ namespace DNSetter
             OperationStatusLabel.Text = "Select an adapter to get started.";
             OperationStatusLabel.AutoSize = true;
             OperationStatusLabel.Dock = DockStyle.Fill;
-            OperationStatusLabel.Padding = new Padding(12);
-            OperationStatusLabel.Margin = Padding.Empty;
+            OperationStatusLabel.Padding = new Padding(12, 8, 12, 8);
+            OperationStatusLabel.Margin = new Padding(20, 0, 20, 0);
             OperationStatusLabel.BackColor = UiTheme.ReadOnly;
             OperationStatusLabel.ForeColor = UiTheme.Text;
             OperationStatusLabel.AccessibleName = "Operation result";
@@ -335,7 +336,6 @@ namespace DNSetter
             content.Controls.Add(adapterCard, 0, 0);
             content.Controls.Add(dnsCard, 0, 1);
             content.Controls.Add(toolsCard, 0, 2);
-            content.Controls.Add(OperationStatusLabel, 0, 3);
 
             footer.Dock = DockStyle.Fill;
             footer.AutoSize = true;
@@ -366,7 +366,8 @@ namespace DNSetter
             footer.Controls.Add(linkLabel2, 2, 0);
             root.Controls.Add(header, 0, 0);
             root.Controls.Add(body, 0, 1);
-            root.Controls.Add(footer, 0, 2);
+            root.Controls.Add(OperationStatusLabel, 0, 2);
+            root.Controls.Add(footer, 0, 3);
 
             toolTip.SetToolTip(UnsetDnsButton, "Use automatically assigned DNS. This does not restore a previous manual preset.");
             toolTip.SetToolTip(AddOrUpdateButton, "Save these addresses as a preset without changing your network.");
@@ -374,7 +375,7 @@ namespace DNSetter
             toolTip.SetToolTip(CurrentAdapterDnsLabel, "Current IPv4 DNS reported by Windows. Select and copy with Ctrl+C.");
             AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
-            ClientSize = new Size(760, 748);
+            ClientSize = new Size(780, 760);
             MinimumSize = new Size(680, 600);
             Font = new Font("Segoe UI", 10F);
             BackColor = UiTheme.Background;
